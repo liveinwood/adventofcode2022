@@ -22,8 +22,8 @@ stacks = V.fromList [ ""
                     , "CRZGH"
                     ]
 
-move :: Int -> Int -> Int -> State Stacks ()
-move n from to = replicateM_ n (helper from to)
+movePartOne :: Int -> Int -> Int -> State Stacks ()
+movePartOne n from to = replicateM_ n (helper from to)
     where
         helper :: Int -> Int -> State Stacks ()
         helper from to = do
@@ -36,8 +36,18 @@ move n from to = replicateM_ n (helper from to)
                 stacks' =  stacks V.// [(from, fromStack'), (to, toStack')]
             put stacks'
 
--- mkOperation :: IO (State Stacks ())
-solve = do
+movePartTwo :: Int -> Int -> Int -> State Stacks ()
+movePartTwo n from to = do
+            stacks <- get
+            let
+                fromStack = stacks V.! from
+                toStack = stacks V.! to
+                fromStack' = drop n fromStack
+                toStack' = take n fromStack ++ toStack
+                stacks' =  stacks V.// [(from, fromStack'), (to, toStack')]
+            put stacks'
+
+solvePartOne = do
         lines_ <- BS.lines <$> BS.getContents :: IO [BS.ByteString]
         let operation = mapM_ helper lines_
             s = execState operation stacks
@@ -45,8 +55,18 @@ solve = do
     where
         helper :: BS.ByteString -> State Stacks ()
         helper s = let [_, n, _, from, _, to] = BS.words s
-                   in move (read . BS.unpack $ n) (read . BS.unpack $ from) (read . BS.unpack $ to)
+                   in movePartOne (read . BS.unpack $ n) (read . BS.unpack $ from) (read . BS.unpack $ to)
+
+solvePartTwo = do
+        lines_ <- BS.lines <$> BS.getContents :: IO [BS.ByteString]
+        let operation = mapM_ helper lines_
+            s = execState operation stacks
+        return $ V.map head (V.tail s)
+    where
+        helper :: BS.ByteString -> State Stacks ()
+        helper s = let [_, n, _, from, _, to] = BS.words s
+                   in movePartTwo (read . BS.unpack $ n) (read . BS.unpack $ from) (read . BS.unpack $ to)
 
 main = do
-    s <- solve
+    s <- solvePartTwo
     print s
