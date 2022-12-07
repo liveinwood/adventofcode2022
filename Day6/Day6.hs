@@ -15,6 +15,16 @@ solvePartOne = go ""
                       | otherwise = go (c:acc) cs
             where
                 unique cs = (length . L.nub) cs == length cs
+
+solvePartTwo :: String -> Int
+solvePartTwo = go ""
+    where
+        go _ "" = error "error"
+        go acc (c:cs) | length acc <= 13 = go (c:acc) cs
+                      | unique (c: take 13 acc) = length (c:acc)
+                      | otherwise = go (c:acc) cs
+            where
+                unique cs = (length . L.nub) cs == length cs
 main = do
     s <- getLine
-    print $ solvePartOne s
+    print $ solvePartTwo s
