@@ -1,11 +1,13 @@
--- stack script --resolver nightly-2022-11-08 --package containers --package bytestring --package vector --package mtl --package transformers
+-- stack script --resolver nightly-2022-11-08 --package containers --package bytestring --package vector --package mtl --package transformers --package sort
 
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Control.Monad.Trans.State
 import qualified Data.Map                  as M
 import qualified Data.Set                  as S
-import           Debug.Trace
+import           Data.Sort
+
+
 
 data Node = Dir String | File String Int deriving (Show, Eq, Ord)
 
@@ -65,6 +67,16 @@ solvePartOne = do
     dirTree <- mkDirTree <$> getContents
     return $ sum . filter (<= 100000) . map (dirSize dirTree) . M.keys $ dirTree
 
+solvePartTwo = do
+    dirTree <- mkDirTree <$> getContents
+    let dirSizeList = map (\k -> (k, dirSize dirTree k)) . M.keys $ dirTree
+        totalUsedSize = snd . head $ filter (\tuple -> fst tuple == [Dir "/"]) dirSizeList
+        unusedSize = 70000000 - totalUsedSize
+    if unusedSize >= 30000000 then
+        return 0
+    else
+        return $ minimum . filter (>= 30000000 - unusedSize) . map snd $ dirSizeList
+
 main = do
-    n <- solvePartOne
+    n <- solvePartTwo
     print n
